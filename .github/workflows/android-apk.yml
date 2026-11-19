@@ -1,0 +1,64 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - arena/**
+    paths-ignore:
+      - 'public/downloads/sokofresh.apk'
+      - '**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Publish APK into web bundle
+        run: |
+          mkdir -p public/downloads
+          cp android/app/build/outputs/apk/debug/app-debug.apk public/downloads/sokofresh.apk
+          ls -la public/downloads/
+
+      - name: Commit APK back to branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: build android apk [skip ci]'
+          file_pattern: 'public/downloads/sokofresh.apk'
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sokofresh-apk
+          path: public/downloads/sokofresh.apk
+          if-no-files-found: error

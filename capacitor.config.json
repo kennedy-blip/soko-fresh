@@ -1,0 +1,21 @@
+{
+  "appId": "com.sokofresh.app",
+  "appName": "SokoFresh",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#070f0c",
+      "showSpinner": false
+    }
+  }
+}
